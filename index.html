@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Science Centre Quiz</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'Segoe UI',Arial,sans-serif;
+background:linear-gradient(135deg,#EFFAFD,#EFFAFD);
+min-height:100vh;
+padding:20px;
+display:flex;
+text-align:center;
+justify-content:center;
+align-items:center;
+}
+
+.box{
+width:100%;
+max-width:650px;
+background:linear-gradient(180deg,#ECE2DF,#EADFDF);
+/*background:#F8F8F9;*/
+padding:10px;
+border-radius:20px;
+box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+.centreName{
+font-size:26px;
+font-weight:700;
+color:#0061FF;
+/*margin:0 0 10px 0;*/
+margin-bottom:5px;
+text-transform:uppercase;
+}
+
+.galleryName{
+font-size:18px;
+color:#C2185B;
+font-weight:bold;
+/*margin:0 0 15px 0;*/
+margin-bottom:5px;
+}
+
+.quizTitle{
+font-size:20px;
+font-weight:bold;
+color:#222;
+margin-bottom:25px;
+}
+
+.progress{
+height:12px;
+background:#9CA3AF;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00c853,#4caf50);
+transition:0.5s;
+}
+
+.qEnglish{
+font-size:20px;
+color:#7A1F2B;
+margin-bottom:8px;
+}
+
+.qTamil{
+font-size:16px;
+color:#5C7029;
+margin-bottom:15px;
+font-weight:bold;
+}
+
+button{
+width:100%;
+padding:14px;
+margin:10px 0;
+border:none;
+border-radius:12px;
+background:#0974F1;
+color:white;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+background:#122B52;
+}
+
+button.correct{
+background:#28a745;
+}
+
+button.wrong{
+background:#dc3545;
+}
+
+button:disabled{
+cursor:not-allowed;
+}
+
+.optTamil{
+display:block;
+font-size:14px;
+margin-top:4px;
+opacity:0.9;
+font-weight:normal;
+}
+
+#result{
+margin-top:20px;
+}
+
+.scoreCard{
+background:#f8f9fa;
+padding:20px;
+border-radius:15px;
+border:3px solid #0d6efd;
+}
+
+.scoreCard h2{
+font-size:32px;
+color:#0d6efd;
+margin-bottom:10px;
+}
+
+.scoreCard p{
+font-size:18px;
+margin-bottom:15px;
+}
+
+.restartBtn{
+background:#198754;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<img src="tnstc logo.png" width="50">
+<p class="centreName" id="centreName"></p>
+<p class="galleryName" id="galleryName"></p>
+<h2>Let's Play The Science Quiz</h2>
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+<h3 class="qEnglish" id="questionEn"></h3>
+<p class="qTamil" id="questionTa"></p>
+<div id="options"></div>
+<p id="result"></p>
+</div>
+<script>
+// Edit these two lines to set your centre and gallery name,
+// or set them once via localStorage from an admin panel later.
+let centreName =
+localStorage.getItem("centreName") || "PERIYAR SCIENCE AND TECHNOLOGY CENTRE";
+let galleryName =
+localStorage.getItem("galleryName") || "PERIYAR GALLERY";
+
+document.getElementById("centreName").innerHTML = centreName;
+document.getElementById("galleryName").innerHTML = galleryName;
+
+let questions =
+JSON.parse(localStorage.getItem("quizQuestions")) || [
+{
+question_en:"Q1. What is Albert Einstein best known for ?",
+question_ta:"ஆல்பர்ட் ஐன்ஸ்டீன் எதற்காக மிகவும் புகழ்பெற்றவர்?",
+options:[
+{en:"Law of Gravitation",ta:"ஈர்ப்பு விசை விதி"},
+{en:"Theory of Relativity",ta:"சார்பியல் கோட்பாடு"},
+{en:"Invention of Telescope",ta:"தொலைநோக்கி கண்டுபிடிப்பு "},
+{en:"Laws of Planetary Motion",ta:"கிரக இயக்க விதிகள் "}
+],
+correct:1
+},
+{
+question_en:" Q2.Who discovered the Law of Gravitation ?",
+question_ta:"ஈர்ப்பு விசை விதியை கண்டறிந்தவர் யார் ?",
+options:[
+{en:"Kepler",ta:"கெப்லர்"},
+{en:"Newton",ta:"நியூட்டன்"},
+{en:"Galileo",ta:"கலிலியோ"},
+{en:"Einstein",ta:"ஐன்ஸ்டீன்"}
+],
+correct:1
+},
+{
+question_en:"Q3.Who discovered that Jupiter has four moons ?",
+question_ta:"வியாழன் கிரகத்திற்கு நான்கு துணைக்கோள்கள் உள்ளன என்பதை கண்டறிந்தவர் யார் ?",
+options:[
+{en:"Galileo ",ta:"கலிலியோ"},
+{en:"Newton",ta:"நியூட்டன்"},
+{en:"Kepler",ta:"கெப்லர்"},
+{en:"Einstein",ta:"ஐன்ஸ்டீன்"}
+],
+correct:0
+},
+{
+question_en:"Q4.Who discovered that planets move in elliptical orbits ?",
+question_ta:"கிரகங்கள் வட்டப்பாதையில் அல்ல, நீள்வட்ட பாதையில் (Ellipse) சுழல்கின்றன என்று கூறியவர் யார்?",
+options:[
+{en:"Newton",ta:"நியூட்டன்"},
+{en:"Kepler",ta:"கெப்லர்"},
+{en:"Einstein",ta:"ஐன்ஸ்டீன்"},
+{en:"Galileo ",ta:"கலிலியோ"}
+],
+correct:3
+},
+{
+question_en:"Q5.In Einstein's equation E = mc² what does E represent?",
+question_ta:"ஐன்ஸ்டீனின் E = mc² சமன்பாட்டில் E என்பது எதைக் குறிக்கிறது?",
+options:[
+{en:"Energy",ta:"ஆற்றல்"},
+{en:"Voltage",ta:"மின்னழுத்தம்"},
+{en:"Velocity",ta:"வேகம்"},
+{en:"Force",ta:"விசை"}
+],
+correct:0
+},
+{
+question_en:"Q6.What happens to the pressure of a fluid when its speed increases?",
+question_ta:"திரவத்தின் வேகம் அதிகரிக்கும்போது அதன் அழுத்தம் என்ன ஆகும்?",
+options:[
+{en:"Increases",ta:"அதிகரிக்கும்"},
+{en:"Decreases",ta:"குறையும்"},
+{en:"Remains same",ta:"மாறாது"},
+{en:"Becomes zero",ta:"பூஜ்யமாகும்"}
+],
+correct:1
+},
+{
+question_en:"Q7.Which device works based on Bernoulli's Principle?",
+question_ta:"பெர்னுலியின் கொள்கையின் அடிப்படையில் செயல்படும் கருவி எது?",
+options:[
+{en:"Thermometer",ta:"வெப்பமானி"},
+{en:"Atomizer Spray",ta:"தெளிப்பான்"},
+{en:"Compass",ta:"திசைகாட்டி"},
+{en:"Battery",ta:"மின்கலம்"}
+],
+correct:1
+},
+{
+question_en:"Q8.Newton's First Law is also called?",
+question_ta:"நியூட்டனின் முதல் விதி வேறு எவ்வாறு அழைக்கப்படுகிறது ?",
+options:[
+{en:"Law of Gravity",ta:"ஈர்ப்பு விதி"},
+{en:"Law of Inertia",ta:"நிலைமத் தன்மை விதி"},
+{en:"Law of Motion",ta:"இயக்க விதி"},
+{en:"Law of Energy",ta:"ஆற்றல் விதி"}
+],
+correct:1
+},
+{
+question_en:"Q9.Energy can neither be created nor destroyed, only transformed. This is called?",
+question_ta:"ஆற்றலை உருவாக்கவோ அழிக்கவோ முடியாது; மாற்ற மட்டுமே முடியும். இது எந்த விதி ?",
+options:[
+{en:"Newton's Law",ta:"நியூட்டனின் விதி"},
+{en:"Conservation of Energy",ta:"ஆற்றல் அழிவின்மை விதி"},
+{en:"Archimedes' Principle",ta:"ஆர்க்கிமிடீஸ் கொள்கை"},
+{en:"Bernoulli's Principle",ta:"பெர்னுலி கொள்கை"}
+],
+correct:1
+},
+{
+question_en:"Q10.Rockets move forward due to?",
+question_ta:"ராக்கெட்டுகள் முன்னோக்கி நகர்வதற்கான காரணம்?",
+options:[
+{en:"Bernoulli Principle",ta:"பெர்னுலி கொள்கை"},
+{en:"Archimedes' Principle",ta:"ஆர்க்கிமிடீஸ் கொள்கை"},
+{en:"Gravity",ta:"ஈர்ப்பு விசை"},
+{en:"Newton's Third Law",ta:"நியூட்டனின் மூன்றாம் விதி"}
+],
+correct:3
+},
+];
+let current=0;
+let score=0;
+function loadQuestion(){
+let q=questions[current];
+document.getElementById("questionEn").innerHTML=q.question_en;
+document.getElementById("questionTa").innerHTML=q.question_ta;
+let html="";
+q.options.forEach((opt,i)=>{
+html += `
+<button onclick="answer(${i})">
+${opt.en}
+<span class="optTamil">${opt.ta}</span>
+</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("bar").style.width=
+(current/questions.length*100)+"%";
+}
+function answer(i){
+let buttons = document.querySelectorAll("#options button");
+buttons.forEach(b=>b.disabled=true);
+let correctIndex = questions[current].correct;
+if(i===correctIndex){
+score++;
+buttons[i].classList.add("correct");
+}else{
+buttons[i].classList.add("wrong");
+buttons[correctIndex].classList.add("correct");
+}
+setTimeout(()=>{
+current++;
+if(current<questions.length){
+loadQuestion();
+}
+else{
+showResult();
+}
+},1200);
+}
+function showResult(){
+
+let percentage =
+Math.round((score/questions.length)*100);
+
+let message="";
+
+if(percentage>=80){
+message="🏆 Excellent!";
+}
+else if(percentage>=60){
+message="🥈 Very Good!";
+}
+else{
+message="📚 Keep Learning!";
+}
+
+document.getElementById("questionEn").innerHTML=
+"🎉 Quiz Completed";
+
+document.getElementById("questionTa").innerHTML=
+"வினாடி வினா வெற்றிகரமாக முடிந்தது";
+
+document.getElementById("options").innerHTML="";
+
+document.getElementById("bar").style.width="100%";
+
+document.getElementById("result").innerHTML=
+`
+<div class="scoreCard">
+<h2>${score}/${questions.length}</h2>
+
+<p><b>${percentage}%</b></p>
+
+<p>${message}</p>
+
+<button class="restartBtn"
+onclick="location.reload()">
+🔄 Try Again
+</button>
+</div>
+`;
+}
+loadQuestion();
+</script>
+</body>
+</html>
